@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FRAME CINEMA — Учебное бронирование</title>
+  <meta name="description" content="Учебное демо бронирования кинотеатра: выбор сеанса, мест на плане зала и получение учебного билета." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="site-shell">
+    <header class="site-header">
+      <div class="brand-block">
+        <p class="eyebrow">Swiss grid booking demo / 2026</p>
+        <h1 class="site-title">FRAME<br />CINEMA</h1>
+      </div>
+
+      <div class="header-meta">
+        <p class="header-note">Пользователь выбирает сеанс, места на плане зала, получает стоимость и учебный билет.</p>
+        <p class="demo-note">Учебное демо: бронирования сохраняются только в этом браузере.</p>
+      </div>
+    </header>
+
+    <main class="layout-grid">
+      <section class="panel panel--controls" aria-labelledby="controls-title">
+        <div class="panel-head">
+          <p class="panel-index">01</p>
+          <h2 id="controls-title">Сеанс и фильтры</h2>
+        </div>
+
+        <form class="controls-form" id="controls-form" novalidate>
+          <div class="field-group">
+            <label for="session-select">Сеанс</label>
+            <select id="session-select" name="session"></select>
+          </div>
+
+          <div class="field-group">
+            <label for="row-filter">Ряд</label>
+            <select id="row-filter" name="rowFilter">
+              <option value="all">Все ряды</option>
+              <option value="A">Ряд A</option>
+              <option value="B">Ряд B</option>
+              <option value="C">Ряд C</option>
+              <option value="D">Ряд D</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label for="price-filter">Максимальная цена</label>
+            <select id="price-filter" name="priceFilter">
+              <option value="all">Любая цена</option>
+              <option value="650">До 650 ₽</option>
+              <option value="750">До 750 ₽</option>
+              <option value="900">До 900 ₽</option>
+            </select>
+          </div>
+
+          <div class="field-group field-group--checkbox">
+            <label class="checkbox-label" for="free-only">
+              <input id="free-only" type="checkbox" />
+              <span>Только свободные места</span>
+            </label>
+          </div>
+
+          <div class="control-actions">
+            <button type="button" class="button button--ghost" id="reset-filters">Сбросить фильтры</button>
+            <button type="button" class="button button--ghost" id="reset-demo">Сбросить демо</button>
+          </div>
+        </form>
+
+        <div class="legend" aria-label="Обозначения мест">
+          <div class="legend-item"><span class="legend-marker legend-marker--free"></span><span>Свободно</span></div>
+          <div class="legend-item"><span class="legend-marker legend-marker--selected"></span><span>Выбрано</span></div>
+          <div class="legend-item"><span class="legend-marker legend-marker--occupied"></span><span>Занято</span></div>
+        </div>
+
+        <div class="feedback" id="app-message" role="status" aria-live="polite"></div>
+        <div class="feedback feedback--error" id="storage-message" role="alert"></div>
+      </section>
+
+      <section class="panel panel--hall" aria-labelledby="hall-title">
+        <div class="panel-head">
+          <p class="panel-index">02</p>
+          <h2 id="hall-title">План зала</h2>
+        </div>
+
+        <div class="screen-label" aria-hidden="true">SCREEN</div>
+        <div class="hall-grid" id="hall-grid" aria-label="Схема зала"></div>
+      </section>
+
+      <section class="panel panel--list" aria-labelledby="list-title">
+        <div class="panel-head">
+          <p class="panel-index">03</p>
+          <h2 id="list-title">Список мест</h2>
+        </div>
+
+        <div class="seat-list" id="seat-list" aria-live="polite"></div>
+        <p class="empty-state" id="list-empty" hidden>По текущим фильтрам подходящих мест нет.</p>
+      </section>
+
+      <section class="panel panel--summary" aria-labelledby="summary-title">
+        <div class="panel-head">
+          <p class="panel-index">04</p>
+          <h2 id="summary-title">Учебный билет</h2>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-row">
+            <span>Фильм</span>
+            <strong id="summary-movie">—</strong>
+          </div>
+          <div class="summary-row">
+            <span>Сеанс</span>
+            <strong id="summary-session">—</strong>
+          </div>
+          <div class="summary-row">
+            <span>Места</span>
+            <strong id="summary-seats">Не выбраны</strong>
+          </div>
+          <div class="summary-row">
+            <span>Билетов</span>
+            <strong id="summary-count">0</strong>
+          </div>
+          <div class="summary-row summary-row--total">
+            <span>Стоимость</span>
+            <strong id="summary-total">0 ₽</strong>
+          </div>
+        </div>
+
+        <form class="booking-form" id="booking-form" novalidate>
+          <div class="field-group">
+            <label for="viewer-name">Имя для билета</label>
+            <input id="viewer-name" name="viewerName" type="text" maxlength="40" placeholder="Например, Владислава" />
+            <p class="field-error" id="name-error"></p>
+          </div>
+
+          <div class="field-group">
+            <label for="viewer-email">E-mail (учебный)</label>
+            <input id="viewer-email" name="viewerEmail" type="email" placeholder="demo@frame-cinema.ru" />
+            <p class="field-error" id="email-error"></p>
+          </div>
+
+          <p class="field-error field-error--global" id="selection-error"></p>
+
+          <button type="submit" class="button button--primary" id="confirm-booking">Подтвердить учебный билет</button>
+        </form>
+      </section>
+
+      <section class="panel panel--bookings" aria-labelledby="bookings-title">
+        <div class="panel-head">
+          <p class="panel-index">05</p>
+          <h2 id="bookings-title">Мои брони</h2>
+        </div>
+
+        <div class="bookings-list" id="bookings-list"></div>
+        <p class="empty-state" id="bookings-empty">У вас пока нет учебных билетов.</p>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
